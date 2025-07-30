@@ -1,0 +1,75 @@
+name: automation demo
+
+on:
+  workflow_dispatch:          # manual trigger only
+
+permissions:
+  contents: write  # מאפשר push ל-gh-pages
+
+jobs:
+  merge_test:
+    name: Run pytest & publish Allure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    container:
+      image: mcr.microsoft.com/playwright:v1.52.0   # browsers + xvfb pre‑installed
+
+    steps:
+      # 1 Check out code
+      - uses: actions/checkout@v4
+
+      # 2 Set up Python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # 3 Create venv & install deps with pip
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4 Run pytest under xvfb, save Allure results
+  # xvfb-run pytest -m devRun --alluredir=allure-results
+      - name: Test with pytest
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          xvfb-run pytest --alluredir=allure-results
+
+      # 5 Write build/git metadata into Allure
+      - name: Add metadata to Allure
+        if: always()
+        working-directory: allure-results
+        run: |
+          {
+            echo BUILD_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            echo GIT_BRANCH=${{ github.head_ref || github.ref_name }}
+            echo GIT_COMMIT_ID=${{ github.sha }}
+            echo GIT_COMMIT_MESSAGE=$(git show -s --format=%s HEAD)
+            echo GIT_COMMIT_AUTHOR_NAME=$(git show -s --format='%ae' HEAD)
+            echo GIT_COMMIT_TIME=$(git show -s --format=%ci HEAD)
+            echo CHROME_VERSION=$(google-chrome --product-version)
+          } >> environment.properties
+
+      # 6 Generate static Allure report
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_report:  allure-report
+          gh_pages:       gh-pages
+          allure_history: allure-history
+
+      # 7 Publish Allure history to GitHub Pages
+      - name: Deploy report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:  allure-history
