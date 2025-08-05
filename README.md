@@ -93,7 +93,7 @@ The test suite covers:
 
 ## 📊 Allure Report
 
-View your project’s Allure report hosted via GitHub Pages from _Settings → Pages_.  
+View my project’s Allure report hosted via GitHub Pages from _Settings → Pages_.  
 Here’s a preview screenshot of the report overview:
 
 <img width="1768" height="970" alt="allurereport" src="https://github.com/user-attachments/assets/88f21f3d-ab07-4385-a214-e73d7c81e255" />
@@ -116,7 +116,8 @@ eenshot]((https://miri-david.github.io/playwright-python-project/5/index.html))
 ## 🔍 Examples & Screenshots
 
 - ✅ Example test: `tests/test_example_login.py`
-- 📸 Screenshots/videos on failure stored under `artifacts/`
+- 📸 Screenshots/videos on failure stored under `artifacts/` example: <img width="1906" height="960" alt="filureallure" src="https://github.com/user-attachments/assets/cf4375ca-9782-49ea-b6a9-458f139cb7a7" />
+ 
 - 🔁 Each run includes a trace file — viewable in the Playwright Trace Viewer
 
 ---
